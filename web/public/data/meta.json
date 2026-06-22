@@ -1,0 +1,19 @@
+{
+  "destination": {
+    "name": "Stansted Airport College",
+    "lat": 51.87615217641031,
+    "lng": 0.21590254232830522
+  },
+  "target_date": "2026-06-23",
+  "arrival_local": "2026-06-23T09:00:00+01:00",
+  "arrival_utc": "2026-06-23T08:00:00Z",
+  "generated_utc": "2026-06-22T12:50:06Z",
+  "n_origins": 82,
+  "route_api_calls": 259,
+  "n_car_routes": 82,
+  "n_transit_routes": 80,
+  "n_no_transit": 2,
+  "n_transit_unrealistic": 2,
+  "diff_domain_min": 110,
+  "candidate_count": 0
+}

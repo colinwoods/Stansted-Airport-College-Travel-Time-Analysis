@@ -1,0 +1,19 @@
+# Secrets
+.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# Node / web
+web/node_modules/
+web/dist/
+
+# Local QA tooling (Playwright browser libs + screenshots)
+.pwlibs/
+web/shots/
+webscreen.png
+
+# Large raw API dump (regenerate with the pipeline)
+data/raw/routes_raw.json

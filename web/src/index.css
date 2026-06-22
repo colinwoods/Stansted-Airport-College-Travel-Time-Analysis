@@ -1,0 +1,183 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+
+  --color-paper: #f4efe5;
+  --color-surface: #fbf8f1;
+  --color-ink: #16130f;
+  --color-graphite: #6f685d;
+  --color-faint: #736c61;
+  --color-hairline: #e3dccd;
+  --color-accent: #d6402a;
+  --color-teal: #0e4f59;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 26%, transparent);
+}
+
+/* Refined thin scrollbar for the trip list */
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-hairline) transparent;
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 7px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  background: var(--color-hairline);
+  border-radius: 99px;
+}
+
+/* Section kicker label */
+.kicker {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 10px;
+  color: var(--color-faint);
+}
+
+/* MapLibre chrome restyle to match the paper aesthetic */
+.maplibregl-ctrl-scale {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--color-graphite);
+  background: color-mix(in srgb, var(--color-surface) 78%, transparent);
+  border-color: var(--color-graphite);
+  border-top: none;
+}
+.maplibregl-canvas:focus {
+  outline: none;
+}
+
+/* Destination marker */
+.dest-marker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transform: translateY(7px);
+  pointer-events: none;
+}
+.dest-marker__ring {
+  width: 15px;
+  height: 15px;
+  border-radius: 99px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3.5px var(--color-paper), 0 0 0 5px var(--color-accent),
+    0 1px 5px rgba(0, 0, 0, 0.3);
+  flex: none;
+}
+.dest-marker__label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  border: 1px solid var(--color-hairline);
+  padding: 3px 7px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+/* Candidate callout markers (diff view) */
+.cand-marker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border: none;
+  background: none;
+  padding: 0;
+}
+.cand-marker__dot {
+  display: flex;
+  height: 18px;
+  width: 18px;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: 99px;
+  background: var(--color-accent);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  box-shadow: 0 0 0 2px var(--color-paper), 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+.cand-marker__label {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--color-ink);
+  background: color-mix(in srgb, var(--color-surface) 93%, transparent);
+  border: 1px solid var(--color-hairline);
+  padding: 2px 6px;
+  border-radius: 4px;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+}
+.cand-marker__gap {
+  color: var(--color-accent);
+}
+.cand-marker:hover .cand-marker__label {
+  border-color: var(--color-accent);
+}
+
+/* --- Print --------------------------------------------------------------- */
+@page {
+  size: A3 landscape;
+  margin: 8mm;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-full {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+  }
+  body {
+    background: #fff;
+  }
+  /* keep legend gradient, marker dots and swatches in colour on paper */
+  .print-full,
+  .print-full * {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+
+/* On-screen "print preview" driven by the Print button toggle */
+.printing .no-print {
+  display: none !important;
+}
