@@ -2,14 +2,14 @@
 // One source, one main line layer, one casing layer underneath; the active mode
 // swaps the colour, width, opacity and draw-order expressions. Highlight is
 // driven by feature-state ("selected" / "hover"), never by mutating geometry.
-import { CAR_STOPS, DIFF_NORM_STOPS, TRANSIT_STOPS, interpStops } from "../lib/scales";
+import { DIFF_NORM_STOPS, DURATION_STOPS, interpStops } from "../lib/scales";
 import type { Mode } from "../data/types";
 
 export const SOURCE_ID = "routes";
 export const LINE_LAYER_ID = "routes-line";
 export const CASING_LAYER_ID = "routes-casing";
 
-const ACCENT = "#d6402a";
+const ACCENT = "#00afde";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Expr = any;
@@ -28,10 +28,9 @@ export function filterFor(mode: Mode): Expr {
 }
 
 export function colorExpr(mode: Mode, domain: number): Expr {
-  if (mode === "car")
-    return ["interpolate", ["linear"], ["get", "duration_min"], ...interpStops(CAR_STOPS)];
-  if (mode === "transit")
-    return ["interpolate", ["linear"], ["get", "duration_min"], ...interpStops(TRANSIT_STOPS)];
+  // car + transit share ONE duration ramp so the modes are directly comparable
+  if (mode === "car" || mode === "transit")
+    return ["interpolate", ["linear"], ["get", "duration_min"], ...interpStops(DURATION_STOPS)];
   return [
     "interpolate", ["linear"],
     ["/", ["to-number", ["get", "diff_min"]], domain],
@@ -45,23 +44,24 @@ export function colorExpr(mode: Mode, domain: number): Expr {
 // car/transit use a constant base and the diff base is a *data*-driven interpolate.
 function baseWidth(mode: Mode): Expr {
   if (mode === "diff")
-    return ["interpolate", ["linear"], ["get", "abs_diff_min"], 0, 4.6, 45, 2.6, 110, 1.1];
-  return 2.6;
+    return ["interpolate", ["linear"], ["get", "abs_diff_min"], 0, 5.6, 45, 3.6, 110, 1.8];
+  return 3.4;
 }
 
 function widthExpr(mode: Mode): Expr {
   const base = baseWidth(mode);
-  return ["case", selected, 6.5, hovered, ["+", base, 1.6], base];
+  return ["case", selected, 7.5, hovered, ["+", base, 1.8], base];
 }
 
 function opacityExpr(mode: Mode): Expr {
   if (mode === "diff")
     return [
-      "case", selected, 1, hovered, 0.95,
+      "case", selected, 1, hovered, 0.98,
       // candidates (small gap) opaque; large car advantage fades back
-      ["interpolate", ["linear"], ["get", "abs_diff_min"], 0, 0.95, 110, 0.4],
+      ["interpolate", ["linear"], ["get", "abs_diff_min"], 0, 0.98, 110, 0.5],
     ];
-  return ["case", selected, 1, hovered, 0.95, 0.62];
+  // saturated lines on the dark canvas read best at high opacity
+  return ["case", selected, 1, hovered, 0.98, 0.86];
 }
 
 function sortKey(mode: Mode): Expr {
@@ -96,17 +96,17 @@ export function casingLayout(mode: Mode) {
 
 export function casingPaint(mode: Mode) {
   const base = baseWidth(mode);
-  // diff lines can be pale (near-parity) on a light basemap, so a dark translucent
-  // casing lifts them; the saturated car/transit ramps read better with a white halo.
-  const idle = mode === "diff" ? "rgba(22,19,15,0.34)" : "#ffffff";
+  // On the dark canvas a near-black casing acts as a separator that makes the
+  // bright lines "neon" and keeps overlapping routes readable. Selected flips to
+  // the cyan signal.
   return {
-    "line-color": ["case", selected, ACCENT, idle] as Expr,
+    "line-color": ["case", selected, ACCENT, "rgba(8,11,15,0.62)"] as Expr,
     "line-width": [
       "case",
-      selected, ["+", 6.5, 4],
-      hovered, ["+", ["+", base, 1.6], 2.4],
-      ["+", base, 2.2],
+      selected, ["+", 7.5, 4],
+      hovered, ["+", ["+", base, 1.8], 2.6],
+      ["+", base, 2.4],
     ] as Expr,
-    "line-opacity": ["case", selected, 0.95, hovered, 0.7, 0.5] as Expr,
+    "line-opacity": ["case", selected, 0.95, hovered, 0.8, 0.6] as Expr,
   };
 }

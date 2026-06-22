@@ -1,6 +1,6 @@
 import { memo } from "react";
 import type { Mode, TripProps } from "../data/types";
-import { colorForCar, colorForDiff, colorForTransit } from "../lib/scales";
+import { colorForDiff, colorForDuration } from "../lib/scales";
 import { fmtGap, fmtKm, fmtMin } from "../lib/format";
 
 interface Props {
@@ -14,9 +14,8 @@ interface Props {
 }
 
 function swatch(mode: Mode, trip: TripProps, domain: number): string {
-  if (mode === "car") return colorForCar(trip.duration_min);
-  if (mode === "transit") return colorForTransit(trip.duration_min);
-  return colorForDiff(trip.diff_min ?? 0, domain);
+  if (mode === "diff") return colorForDiff(trip.diff_min ?? 0, domain);
+  return colorForDuration(trip.duration_min);
 }
 
 function TripRow({ trip, mode, domain, selected, hovered, onSelect, onHover }: Props) {

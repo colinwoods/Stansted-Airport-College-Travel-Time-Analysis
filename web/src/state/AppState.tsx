@@ -14,6 +14,8 @@ interface AppState {
   setHoveredTripId: (id: string | null) => void;
   printMode: boolean;
   setPrintMode: (v: boolean) => void;
+  splitView: boolean;
+  setSplitView: (v: boolean) => void;
 }
 
 const Ctx = createContext<AppState | null>(null);
@@ -24,6 +26,7 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
   const [hoveredTripId, setHoveredTripId] = useState<string | null>(null);
   const [printMode, setPrintMode] = useState(false);
+  const [splitView, setSplitView] = useState(false);
 
   const value = useMemo<AppState>(
     () => ({
@@ -32,8 +35,9 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       selectedTripId, setSelectedTripId,
       hoveredTripId, setHoveredTripId,
       printMode, setPrintMode,
+      splitView, setSplitView,
     }),
-    [data, loading, error, mode, selectedTripId, hoveredTripId, printMode],
+    [data, loading, error, mode, selectedTripId, hoveredTripId, printMode, splitView],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

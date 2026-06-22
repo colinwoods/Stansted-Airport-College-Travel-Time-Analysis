@@ -1,22 +1,31 @@
 @import "tailwindcss";
 
 @theme {
+  /* Hanken Grotesk carries both display + body (Steer brand), weight + size
+     give the hierarchy. IBM Plex Mono for figures + labels. */
   --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Hanken Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
-  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
 
-  --color-paper: #f4efe5;
-  --color-surface: #fbf8f1;
-  --color-ink: #16130f;
-  --color-graphite: #6f685d;
-  --color-faint: #736c61;
-  --color-hairline: #e3dccd;
-  --color-accent: #d6402a;
-  --color-teal: #0e4f59;
+  /* Steer Group palette — dark canvas, cyan signal.
+     Steer Black #161b21 · Steer Blue #00afde · White */
+  --color-paper: #161b21;       /* page canvas (Steer Black) */
+  --color-surface: #1a2026;     /* cards / sidebar */
+  --color-surface-2: #1f262e;   /* elevated / row hover */
+  --color-ink: #ffffff;         /* primary text */
+  --color-graphite: #c4ccd4;    /* secondary text */
+  --color-faint: #8a96a0;       /* tertiary / labels (kept >=4.5:1 on surface) */
+  --color-hairline: #2b333c;    /* structural hairline */
+  --color-hairline-soft: #232a31;
+  --color-accent: #00afde;      /* Steer Blue — signal / CTA / focus */
+  --color-accent-deep: #0091ba; /* CTA hover */
+  --color-teal: #00afde;
+  --color-danger: #f0616d;
+  --color-positive: #3ecf8e;
 }
 
 :root {
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 html,
@@ -28,6 +37,8 @@ body,
 
 body {
   background: var(--color-paper);
+  background-image: radial-gradient(120% 80% at 50% -15%, rgba(0, 175, 222, 0.08), transparent 60%);
+  background-attachment: fixed;
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
@@ -35,7 +46,8 @@ body {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--color-accent) 26%, transparent);
+  background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  color: #fff;
 }
 
 /* Refined thin scrollbar for the trip list */
@@ -60,98 +72,125 @@ body {
   color: var(--color-faint);
 }
 
-/* MapLibre chrome restyle to match the paper aesthetic */
+/* Steer's single uppercase-label tracking — used across the control chrome */
+.tracking-section {
+  letter-spacing: 0.08em;
+}
+
+/* Keyboard focus: a visible cyan ring on every interactive control. The map
+   canvas keeps outline:none below, but real controls must show focus. */
+:where(button, a, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* MapLibre chrome restyle to match the dark canvas */
 .maplibregl-ctrl-scale {
   font-family: var(--font-mono);
   font-size: 10px;
   letter-spacing: 0.04em;
   color: var(--color-graphite);
-  background: color-mix(in srgb, var(--color-surface) 78%, transparent);
-  border-color: var(--color-graphite);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  border-color: var(--color-faint);
   border-top: none;
 }
 .maplibregl-canvas:focus {
   outline: none;
 }
+.maplibregl-ctrl-attrib.maplibregl-compact {
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+}
 
-/* Destination marker */
-.dest-marker {
+/* --- Map markers --------------------------------------------------------- */
+/* The dot is the marker root and is anchored dead-centre on its coordinate;
+   the label is position:absolute so it never enters the element's box. That
+   keeps the dot pinned to the map as you zoom (no drift) and lets the label
+   be revealed only on hover / active without shifting the anchor. */
+.map-marker {
+  position: relative;
+  display: block;
+  border: none;
+  background: none;
+  padding: 0;
+  line-height: 0;
+  pointer-events: auto;
+  cursor: pointer;
+}
+.map-marker__label {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: 8px;
-  transform: translateY(7px);
-  pointer-events: none;
-}
-.dest-marker__ring {
-  width: 15px;
-  height: 15px;
-  border-radius: 99px;
-  background: var(--color-accent);
-  box-shadow: 0 0 0 3.5px var(--color-paper), 0 0 0 5px var(--color-accent),
-    0 1px 5px rgba(0, 0, 0, 0.3);
-  flex: none;
-}
-.dest-marker__label {
+  gap: 6px;
+  white-space: nowrap;
   font-family: var(--font-mono);
   font-size: 10.5px;
   font-weight: 600;
   letter-spacing: 0.02em;
-  text-transform: uppercase;
   color: var(--color-ink);
-  background: color-mix(in srgb, var(--color-surface) 92%, transparent);
+  background: color-mix(in srgb, var(--color-surface) 94%, transparent);
   border: 1px solid var(--color-hairline);
   padding: 3px 7px;
-  border-radius: 4px;
-  white-space: nowrap;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 5px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.14s ease;
+  pointer-events: none;
+  line-height: 1.2;
+}
+.map-marker:hover .map-marker__label,
+.map-marker:focus-visible .map-marker__label,
+.map-marker.is-active .map-marker__label {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Destination (the college) — cyan beacon */
+.dest-marker__ring {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 99px;
+  background: var(--color-accent);
+  box-shadow: 0 0 0 3px var(--color-paper), 0 0 0 4.5px var(--color-accent),
+    0 0 14px 2px color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+.dest-marker .map-marker__label {
+  text-transform: uppercase;
+  border-color: color-mix(in srgb, var(--color-accent) 45%, var(--color-hairline));
 }
 
 /* Candidate callout markers (diff view) */
-.cand-marker {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  border: none;
-  background: none;
-  padding: 0;
-}
 .cand-marker__dot {
   display: flex;
-  height: 18px;
-  width: 18px;
-  flex: none;
+  height: 19px;
+  width: 19px;
   align-items: center;
   justify-content: center;
   border-radius: 99px;
   background: var(--color-accent);
   font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: 600;
-  color: #fff;
-  box-shadow: 0 0 0 2px var(--color-paper), 0 1px 4px rgba(0, 0, 0, 0.3);
-}
-.cand-marker__label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  color: var(--color-ink);
-  background: color-mix(in srgb, var(--color-surface) 93%, transparent);
-  border: 1px solid var(--color-hairline);
-  padding: 2px 6px;
-  border-radius: 4px;
-  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.08);
+  font-weight: 700;
+  color: var(--color-paper);
+  box-shadow: 0 0 0 2px var(--color-paper), 0 0 12px 1px color-mix(in srgb, var(--color-accent) 65%, transparent);
 }
 .cand-marker__gap {
   color: var(--color-accent);
 }
-.cand-marker:hover .cand-marker__label {
-  border-color: var(--color-accent);
+.cand-marker:hover .cand-marker__dot,
+.cand-marker.is-active .cand-marker__dot {
+  background: #fff;
+  color: var(--color-paper);
 }
 
 /* --- Print --------------------------------------------------------------- */
+/* Dark UI doesn't belong on paper: flip the document to a light ground for
+   the A3 export so route colours stay legible and ink isn't wasted. */
 @page {
   size: A3 landscape;
   margin: 8mm;
@@ -169,7 +208,6 @@ body {
   body {
     background: #fff;
   }
-  /* keep legend gradient, marker dots and swatches in colour on paper */
   .print-full,
   .print-full * {
     -webkit-print-color-adjust: exact;

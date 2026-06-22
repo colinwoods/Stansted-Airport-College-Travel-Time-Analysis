@@ -2,24 +2,26 @@ import { useMemo } from "react";
 import { useApp } from "../state/AppState";
 import { modeLabel } from "../lib/format";
 
+// A slim context strip — the sidebar already carries the title, so the map only
+// needs the active lens + the arrival assumption + date for orientation / print.
 export default function MapTitle() {
   const { data, mode } = useApp();
   const dateLabel = useMemo(() => {
     if (!data) return "";
     const d = new Date(`${data.meta.target_date}T09:00:00`);
-    return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" }).format(d);
+    return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric" }).format(d);
   }, [data]);
   if (!data) return null;
 
   return (
-    <div className="max-w-[340px] rounded-lg border border-hairline bg-surface/92 px-4 py-3 shadow-[0_6px_24px_rgba(0,0,0,0.10)] backdrop-blur">
-      <div className="kicker">Travel Time Atlas · Modal Shift Study</div>
-      <h2 className="mt-1.5 font-display text-[21px] font-semibold leading-none tracking-tight text-ink">
-        {data.meta.destination.name}
-      </h2>
-      <p className="mt-2 font-mono text-[10.5px] uppercase tracking-wide text-graphite">
-        <span className="text-accent">{modeLabel(mode)}</span> · arrive by 09:00 · {dateLabel}
-      </p>
+    <div className="flex items-center gap-2 rounded-full border border-hairline bg-surface/85 px-3.5 py-1.5 shadow-[0_8px_28px_rgba(0,0,0,0.5)] backdrop-blur">
+      <span className="font-mono text-[10px] font-semibold uppercase tracking-section text-accent">
+        {modeLabel(mode)}
+      </span>
+      <span className="h-3 w-px bg-hairline" />
+      <span className="font-mono text-[10px] uppercase tracking-section text-graphite">
+        arrive 09:00 · {dateLabel}
+      </span>
     </div>
   );
 }

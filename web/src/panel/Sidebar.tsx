@@ -29,7 +29,7 @@ function Stat({ value, label, accent }: { value: string; label: string; accent?:
 }
 
 export default function Sidebar() {
-  const { data, mode } = useApp();
+  const { data, mode, setSplitView } = useApp();
 
   const dateLabel = useMemo(() => {
     if (!data) return "";
@@ -73,6 +73,17 @@ export default function Sidebar() {
 
       <div className="flex flex-col gap-4 px-5 py-4">
         <ModeToggle />
+
+        <button
+          onClick={() => setSplitView(true)}
+          className="flex items-center justify-center gap-2 rounded-full border border-hairline bg-transparent px-4 py-2 font-mono text-[10.5px] font-semibold uppercase tracking-section text-graphite transition-colors hover:border-accent hover:text-ink"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="3" y="4" width="7" height="16" rx="1" />
+            <rect x="14" y="4" width="7" height="16" rx="1" />
+          </svg>
+          Compare side by side
+        </button>
 
         {mode === "diff" && (
           <>

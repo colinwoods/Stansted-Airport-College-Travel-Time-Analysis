@@ -4,36 +4,31 @@
 
 export type Stop = [number, string];
 
-// Car journey time — a warm sequential ramp (pale straw -> deep oxblood).
-// Light = fast, dark = slow. Domain tuned to the observed car range (~5-45 min).
-export const CAR_STOPS: Stop[] = [
-  [5, "#f4e7bf"],
-  [15, "#eec65f"],
-  [25, "#e0913a"],
-  [35, "#c15424"],
-  [45, "#7e1f13"],
+// Journey time — ONE shared "heat" ramp used by BOTH car and transit so the two
+// modes sit on an identical scale: a 40-minute trip is the same colour whether
+// driven or ridden. Cool/bright = fast, hot = slow. Vivid throughout (no grey)
+// to stay legible on the dark Steer basemap. Domain spans both modes (~5-135 min),
+// which is what makes transit's long journeys read correctly as "hot".
+export const DURATION_STOPS: Stop[] = [
+  [5, "#16cde0"],   // bright cyan — fastest
+  [38, "#5fd97a"],  // green
+  [70, "#f2c63b"],  // amber
+  [102, "#f0853c"], // orange
+  [135, "#ec4f5c"], // red — slowest
 ];
 
-// Transit journey time — a cool sequential ramp (pale ice -> deep navy).
-// Domain spans the realistic transit range (~15-135 min).
-export const TRANSIT_STOPS: Stop[] = [
-  [15, "#d8e7ed"],
-  [45, "#8abfd6"],
-  [75, "#3f8cbd"],
-  [105, "#24588f"],
-  [135, "#112a52"],
-];
-
-// Difference (car_min - transit_min), expressed as a *normalised* position in
-// [-1, 1] where t = diff / domain. Diverging: deep teal (car much faster) ->
-// warm cream (parity) -> vermilion (transit faster).
+// Difference (car_min - transit_min) as a *normalised* position in [-1, 1] where
+// t = diff / domain. One-sided in this dataset (car always faster), so the ramp
+// recedes for a large car advantage (deep slate-blue) and brightens toward parity
+// (bright cyan = the strongest switch candidates), turning warm only if transit
+// ever wins. No grey / cream — every stop reads on the dark canvas.
 export const DIFF_NORM_STOPS: Stop[] = [
-  [-1.0, "#0e4f59"],
-  [-0.5, "#5ba0a6"],
-  [-0.18, "#cbdcd3"],
-  [0.0, "#efe1c2"],
-  [0.5, "#df8a4d"],
-  [1.0, "#b23018"],
+  [-1.0, "#245a7a"],  // car hugely faster — recedes
+  [-0.55, "#1f93c4"],
+  [-0.18, "#00b7e6"], // closing in — Steer cyan
+  [0.0, "#7fe9ff"],   // parity — brightest
+  [0.4, "#f4b13a"],   // transit edging ahead
+  [1.0, "#f0616d"],   // transit clearly faster
 ];
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -68,8 +63,8 @@ export function sampleStops(stops: Stop[], value: number): string {
   return stops[stops.length - 1][1];
 }
 
-export const colorForCar = (min: number) => sampleStops(CAR_STOPS, min);
-export const colorForTransit = (min: number) => sampleStops(TRANSIT_STOPS, min);
+// Shared by car + transit — both ride the same duration ramp.
+export const colorForDuration = (min: number) => sampleStops(DURATION_STOPS, min);
 export const colorForDiff = (diff: number, domain: number) =>
   sampleStops(DIFF_NORM_STOPS, Math.max(-1, Math.min(1, diff / domain)));
 

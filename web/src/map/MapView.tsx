@@ -9,6 +9,7 @@ import Map, {
 } from "@vis.gl/react-maplibre";
 import { useApp } from "../state/AppState";
 import { fmtGap } from "../lib/format";
+import type { Mode } from "../data/types";
 import {
   CASING_LAYER_ID,
   LINE_LAYER_ID,
@@ -20,13 +21,30 @@ import {
   linePaint,
 } from "./layerStyles";
 
-const BASEMAP = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
+const BASEMAP = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
 
-export default function MapView() {
-  const { data, mode, selectedTripId, setSelectedTripId, hoveredTripId, setHoveredTripId, printMode } =
-    useApp();
+type LngLatBounds = [[number, number], [number, number]];
+
+export default function MapView({
+  modeOverride,
+  main = true,
+}: {
+  modeOverride?: Mode;
+  main?: boolean;
+}) {
+  const {
+    data,
+    mode: globalMode,
+    selectedTripId,
+    setSelectedTripId,
+    hoveredTripId,
+    setHoveredTripId,
+    printMode,
+  } = useApp();
+  const mode = modeOverride ?? globalMode;
   const mapRef = useRef<MapRef | null>(null);
   const [labelBeforeId, setLabelBeforeId] = useState<string | undefined>(undefined);
+  const [styleReady, setStyleReady] = useState(false);
   const [cursor, setCursor] = useState<string>("");
   const prevSelected = useRef<string | null>(null);
   const prevHovered = useRef<string | null>(null);
@@ -37,7 +55,7 @@ export default function MapView() {
   const domain = meta?.diff_domain_min ?? 60;
 
   // Fit to the catchment (all origins + the college) once data is ready.
-  const bounds = useMemo<[[number, number], [number, number]] | null>(() => {
+  const bounds = useMemo<LngLatBounds | null>(() => {
     if (!originsFC || !meta) return null;
     let minX = meta.destination.lng, minY = meta.destination.lat;
     let maxX = minX, maxY = minY;
@@ -48,6 +66,23 @@ export default function MapView() {
     }
     return [[minX, minY], [maxX, maxY]];
   }, [originsFC, meta]);
+
+  // per-trip bounding box, so selecting a row can frame that single journey
+  // (plain record — the maplibre `Map` import shadows the global Map constructor)
+  const tripBBox = useMemo(() => {
+    const m: Record<string, LngLatBounds> = {};
+    if (!routes) return m;
+    for (const f of routes.features) {
+      const coords = (f.geometry as GeoJSON.LineString).coordinates;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      for (const [x, y] of coords) {
+        minX = Math.min(minX, x); minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x); maxY = Math.max(maxY, y);
+      }
+      m[f.properties.tripId] = [[minX, minY], [maxX, maxY]];
+    }
+    return m;
+  }, [routes]);
 
   // top modal-shift candidates (smallest car advantage) — called out on the map in
   // diff mode so the answer is obvious at a glance and survives into print
@@ -62,12 +97,13 @@ export default function MapView() {
   const onLoad = useCallback(() => {
     const map = mapRef.current?.getMap();
     if (!map) return;
-    if (import.meta.env.DEV) (window as unknown as { __map: unknown }).__map = map;
+    if (main && import.meta.env.DEV) (window as unknown as { __map: unknown }).__map = map;
     // place route layers beneath the basemap's labels for a clean cartographic read
     const firstSymbol = map.getStyle().layers?.find((l) => l.type === "symbol");
     if (firstSymbol) setLabelBeforeId(firstSymbol.id);
     if (bounds) map.fitBounds(bounds, { padding: 64, duration: 0 });
-  }, [bounds]);
+    setStyleReady(true); // re-assert any pending selection/hover once the style is live
+  }, [bounds, main]);
 
   // feature-state: selection
   useEffect(() => {
@@ -80,7 +116,7 @@ export default function MapView() {
       setState(prevSelected.current, false);
     setState(selectedTripId, true);
     prevSelected.current = selectedTripId;
-  }, [selectedTripId, mode, data]);
+  }, [selectedTripId, mode, data, styleReady]);
 
   // feature-state: hover
   useEffect(() => {
@@ -91,7 +127,21 @@ export default function MapView() {
     if (hoveredTripId)
       map.setFeatureState({ source: SOURCE_ID, id: hoveredTripId }, { hover: true });
     prevHovered.current = hoveredTripId;
-  }, [hoveredTripId]);
+  }, [hoveredTripId, styleReady]);
+
+  // pan/zoom to the selected journey's extent (main map only — driven by row + map clicks)
+  useEffect(() => {
+    if (!main) return;
+    const map = mapRef.current?.getMap();
+    if (!map || !selectedTripId) return;
+    const bb = tripBBox[selectedTripId];
+    if (bb)
+      map.fitBounds(bb, {
+        padding: { top: 80, right: 300, bottom: 110, left: 80 },
+        duration: 750,
+        maxZoom: 12.5,
+      });
+  }, [selectedTripId, main, tripBBox]);
 
   // keep the canvas correctly sized when the print layout collapses the panel
   useEffect(() => {
@@ -166,35 +216,40 @@ export default function MapView() {
           type="circle"
           beforeId={labelBeforeId}
           paint={{
-            "circle-radius": ["interpolate", ["linear"], ["zoom"], 7, 2.2, 12, 4],
-            "circle-color": "#16130f",
-            "circle-opacity": 0.55,
-            "circle-stroke-color": "#f6f2ea",
+            "circle-radius": ["interpolate", ["linear"], ["zoom"], 7, 2, 12, 3.6],
+            "circle-color": "#aebcc6",
+            "circle-opacity": 0.4,
+            "circle-stroke-color": "#11161b",
             "circle-stroke-width": 1,
           }}
         />
       </Source>
 
-      {candidates.map((c, i) => (
-        <Marker key={c.originId} longitude={c.lng as number} latitude={c.lat as number} anchor="left">
-          <button
-            className="cand-marker"
-            onClick={() => setSelectedTripId(`${c.originId}-car`)}
-            onMouseEnter={() => setHoveredTripId(`${c.originId}-car`)}
-            onMouseLeave={() => setHoveredTripId(null)}
-          >
-            <span className="cand-marker__dot">{i + 1}</span>
-            <span className="cand-marker__label">
-              {c.postcode} <span className="cand-marker__gap">{fmtGap(c.diff_min)}</span>
-            </span>
-          </button>
-        </Marker>
-      ))}
+      {candidates.map((c, i) => {
+        const tripId = `${c.originId}-car`;
+        const active = selectedTripId === tripId || hoveredTripId === tripId;
+        return (
+          <Marker key={c.originId} longitude={c.lng as number} latitude={c.lat as number} anchor="center">
+            <button
+              className={["map-marker cand-marker", active && "is-active"].filter(Boolean).join(" ")}
+              aria-label={`${c.postcode}: public transport ${Math.abs(c.diff_min ?? 0)} min slower than driving`}
+              onClick={() => setSelectedTripId(tripId)}
+              onMouseEnter={() => setHoveredTripId(tripId)}
+              onMouseLeave={() => setHoveredTripId(null)}
+            >
+              <span className="cand-marker__dot">{i + 1}</span>
+              <span className="map-marker__label">
+                {c.postcode} <span className="cand-marker__gap">{fmtGap(c.diff_min)}</span>
+              </span>
+            </button>
+          </Marker>
+        );
+      })}
 
-      <Marker longitude={meta.destination.lng} latitude={meta.destination.lat} anchor="bottom">
-        <div className="dest-marker">
+      <Marker longitude={meta.destination.lng} latitude={meta.destination.lat} anchor="center">
+        <div className="map-marker dest-marker">
           <span className="dest-marker__ring" />
-          <span className="dest-marker__label">{meta.destination.name}</span>
+          <span className="map-marker__label">{meta.destination.name}</span>
         </div>
       </Marker>
     </Map>

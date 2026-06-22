@@ -30,33 +30,38 @@ export default function Scatter() {
   const idFor = (oid: string) => `${oid}-${mode === "transit" ? "transit" : "car"}`;
 
   return (
-    <div className="w-[268px] rounded-lg border border-hairline bg-surface/95 p-3.5 shadow-[0_6px_24px_rgba(0,0,0,0.10)] backdrop-blur">
+    <div className="w-[268px] rounded-lg border border-hairline bg-surface/95 p-3.5 shadow-[0_10px_34px_rgba(0,0,0,0.5)] backdrop-blur">
       <div className="kicker mb-1">Drive vs transit · minutes</div>
-      <svg viewBox={`0 0 ${SIZE} ${SIZE}`} className="w-full" role="img">
+      <svg
+        viewBox={`0 0 ${SIZE} ${SIZE}`}
+        className="w-full"
+        role="img"
+        aria-label="Drive time versus transit time, one point per origin. Every point sits above the parity diagonal, meaning driving is faster everywhere. Select a journey from the list on the left to inspect it."
+      >
         {/* switch zone: below the diagonal = transit faster than car */}
         <polygon
           points={`${sx(0)},${sy(0)} ${sx(max)},${sy(max)} ${sx(max)},${sy(0)}`}
-          fill="#0e4f59"
-          opacity={0.05}
+          fill="#00afde"
+          opacity={0.08}
         />
         {/* axes */}
-        <line x1={PAD} y1={sy(0)} x2={sx(max)} y2={sy(0)} stroke="#16130f" strokeWidth={1} />
-        <line x1={PAD} y1={sy(0)} x2={PAD} y2={sy(max)} stroke="#16130f" strokeWidth={1} />
+        <line x1={PAD} y1={sy(0)} x2={sx(max)} y2={sy(0)} stroke="#4a555f" strokeWidth={1} />
+        <line x1={PAD} y1={sy(0)} x2={PAD} y2={sy(max)} stroke="#4a555f" strokeWidth={1} />
         {/* parity diagonal */}
         <line
           x1={sx(0)} y1={sy(0)} x2={sx(max)} y2={sy(max)}
-          stroke="#6f685d" strokeWidth={1} strokeDasharray="3 3"
+          stroke="#7c8893" strokeWidth={1} strokeDasharray="3 3"
         />
         {ticks.map((t) => (
           <g key={t}>
             <text x={sx(t)} y={SIZE - PAD + 12} textAnchor="middle"
-              fontFamily="var(--font-mono)" fontSize={8} fill="#6f685d">{t}</text>
+              fontFamily="var(--font-mono)" fontSize={8} fill="#7c8893">{t}</text>
             <text x={PAD - 6} y={sy(t) + 3} textAnchor="end"
-              fontFamily="var(--font-mono)" fontSize={8} fill="#6f685d">{t}</text>
+              fontFamily="var(--font-mono)" fontSize={8} fill="#7c8893">{t}</text>
           </g>
         ))}
         <text x={sx(max)} y={sy(max) - 5} textAnchor="end"
-          fontFamily="var(--font-mono)" fontSize={8} fill="#6f685d">transit = car</text>
+          fontFamily="var(--font-mono)" fontSize={8} fill="#7c8893">transit = car</text>
 
         {pts.map((p) => {
           const sel = selOrigin === p.originId;
@@ -66,9 +71,9 @@ export default function Scatter() {
               cx={sx(p.car_min!)} cy={sy(p.transit_min!)}
               r={sel ? 5.5 : 3.2}
               fill={colorForDiff(p.diff_min!, domain)}
-              stroke={sel ? "#d6402a" : "#16130f"}
+              stroke={sel ? "#00afde" : "#0d1217"}
               strokeWidth={sel ? 2 : 0.5}
-              opacity={selOrigin && !sel ? 0.35 : 0.92}
+              opacity={selOrigin && !sel ? 0.4 : 0.95}
               style={{ cursor: "pointer" }}
               onClick={() => setSelectedTripId(idFor(p.originId))}
               onMouseEnter={() => setHoveredTripId(idFor(p.originId))}
@@ -77,7 +82,7 @@ export default function Scatter() {
           );
         })}
       </svg>
-      <div className="mt-1 text-center font-mono text-[8px] uppercase tracking-wider text-faint">
+      <div className="mt-1 text-center font-mono text-[8px] uppercase tracking-section text-faint">
         x · drive min → y · transit min
       </div>
     </div>
