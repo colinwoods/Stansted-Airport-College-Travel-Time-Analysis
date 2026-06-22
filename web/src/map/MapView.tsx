@@ -7,6 +7,7 @@ import Map, {
   type MapLayerMouseEvent,
   type MapRef,
 } from "@vis.gl/react-maplibre";
+import type { Map as MaplibreMap } from "maplibre-gl";
 import { useApp } from "../state/AppState";
 import { fmtGap } from "../lib/format";
 import type { Mode } from "../data/types";
@@ -21,16 +22,20 @@ import {
   linePaint,
 } from "./layerStyles";
 
-const BASEMAP = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+const BASEMAP_DARK = "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json";
+// print swaps to a light ground; the route ramp colours are kept unchanged
+const BASEMAP_LIGHT = "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json";
 
 type LngLatBounds = [[number, number], [number, number]];
 
 export default function MapView({
   modeOverride,
   main = true,
+  onMapReady,
 }: {
   modeOverride?: Mode;
   main?: boolean;
+  onMapReady?: (map: MaplibreMap) => void;
 }) {
   const {
     data,
@@ -98,12 +103,18 @@ export default function MapView({
     const map = mapRef.current?.getMap();
     if (!map) return;
     if (main && import.meta.env.DEV) (window as unknown as { __map: unknown }).__map = map;
-    // place route layers beneath the basemap's labels for a clean cartographic read
-    const firstSymbol = map.getStyle().layers?.find((l) => l.type === "symbol");
-    if (firstSymbol) setLabelBeforeId(firstSymbol.id);
+    onMapReady?.(map);
+    // place route layers beneath the basemap's labels — re-find the insertion
+    // point on every style load so the print basemap swap stays correct
+    const findLabels = () => {
+      const firstSymbol = map.getStyle()?.layers?.find((l) => l.type === "symbol");
+      if (firstSymbol) setLabelBeforeId(firstSymbol.id);
+    };
+    findLabels();
+    map.on("style.load", findLabels);
     if (bounds) map.fitBounds(bounds, { padding: 64, duration: 0 });
     setStyleReady(true); // re-assert any pending selection/hover once the style is live
-  }, [bounds, main]);
+  }, [bounds, main, onMapReady]);
 
   // feature-state: selection
   useEffect(() => {
@@ -177,7 +188,7 @@ export default function MapView({
   return (
     <Map
       ref={mapRef}
-      mapStyle={BASEMAP}
+      mapStyle={printMode ? BASEMAP_LIGHT : BASEMAP_DARK}
       initialViewState={{ longitude: meta.destination.lng, latitude: meta.destination.lat, zoom: 9 }}
       interactiveLayerIds={[LINE_LAYER_ID]}
       onLoad={onLoad}
@@ -217,9 +228,9 @@ export default function MapView({
           beforeId={labelBeforeId}
           paint={{
             "circle-radius": ["interpolate", ["linear"], ["zoom"], 7, 2, 12, 3.6],
-            "circle-color": "#aebcc6",
-            "circle-opacity": 0.4,
-            "circle-stroke-color": "#11161b",
+            "circle-color": printMode ? "#3a4654" : "#aebcc6",
+            "circle-opacity": printMode ? 0.7 : 0.4,
+            "circle-stroke-color": printMode ? "#ffffff" : "#11161b",
             "circle-stroke-width": 1,
           }}
         />

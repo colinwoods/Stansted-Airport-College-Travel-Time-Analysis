@@ -31,14 +31,6 @@ function Stat({ value, label, accent }: { value: string; label: string; accent?:
 export default function Sidebar() {
   const { data, mode, setSplitView } = useApp();
 
-  const dateLabel = useMemo(() => {
-    if (!data) return "";
-    const d = new Date(`${data.meta.target_date}T09:00:00`);
-    return new Intl.DateTimeFormat("en-GB", {
-      weekday: "short", day: "numeric", month: "short", year: "numeric",
-    }).format(d);
-  }, [data]);
-
   const stats = useMemo(() => {
     if (!data) return null;
     const o = data.origins;
@@ -62,13 +54,10 @@ export default function Sidebar() {
   return (
     <aside className="no-print flex h-full w-[384px] flex-none flex-col border-r border-hairline bg-surface">
       <header className="border-b border-hairline px-5 pb-4 pt-5">
-        <div className="kicker">Travel Time Atlas · Modal Shift</div>
+        <div className="kicker">Travel Time Analysis</div>
         <h1 className="mt-2 font-display text-[27px] font-semibold leading-[1.05] tracking-tight text-ink">
           Stansted Airport College
         </h1>
-        <p className="mt-2 font-mono text-[11px] text-graphite">
-          Journeys arriving by 09:00 · {dateLabel}
-        </p>
       </header>
 
       <div className="flex flex-col gap-4 px-5 py-4">

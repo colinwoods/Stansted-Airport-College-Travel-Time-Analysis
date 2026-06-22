@@ -189,10 +189,10 @@ body {
 }
 
 /* --- Print --------------------------------------------------------------- */
-/* Dark UI doesn't belong on paper: flip the document to a light ground for
-   the A3 export so route colours stay legible and ink isn't wasted. */
+/* Dark UI doesn't belong on paper: the map swaps to a light basemap (keeping
+   the data-viz route colours) and the document flips to a light ground. */
 @page {
-  size: A3 landscape;
+  size: A4 landscape;
   margin: 8mm;
 }
 
