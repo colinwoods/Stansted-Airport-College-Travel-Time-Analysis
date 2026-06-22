@@ -4,6 +4,7 @@ import Sidebar from "./panel/Sidebar";
 import Legend from "./ui/Legend";
 import Scatter from "./ui/Scatter";
 import MapTitle from "./ui/MapTitle";
+import CompareButton from "./ui/CompareButton";
 import SplitView from "./ui/SplitView";
 
 function NorthArrow() {
@@ -45,12 +46,11 @@ export default function App() {
           <div className="pointer-events-auto absolute left-4 top-4">
             <MapTitle />
           </div>
-          {/* the scatter only earns its space in the comparison lens */}
-          {mode === "diff" && (
-            <div className="pointer-events-auto absolute right-4 top-4">
-              <Scatter />
-            </div>
-          )}
+          {/* top-right action stack: compare always, scatter only in the comparison lens */}
+          <div className="pointer-events-auto absolute right-4 top-4 flex flex-col items-end gap-2">
+            <CompareButton />
+            {mode === "diff" && <Scatter />}
+          </div>
           <div className="pointer-events-auto absolute bottom-4 right-4 flex flex-col items-end gap-2">
             <NorthArrow />
             <Legend />

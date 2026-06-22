@@ -2,6 +2,7 @@ import { memo } from "react";
 import type { Mode, TripProps } from "../data/types";
 import { colorForDiff, colorForDuration } from "../lib/scales";
 import { fmtGap, fmtKm, fmtMin } from "../lib/format";
+import TransitLegs from "./TransitLegs";
 
 interface Props {
   trip: TripProps;
@@ -26,7 +27,7 @@ function TripRow({ trip, mode, domain, selected, hovered, onSelect, onHover }: P
       onMouseEnter={() => onHover(trip.tripId)}
       onMouseLeave={() => onHover(null)}
       className={[
-        "flex w-full items-center gap-3 border-l-2 px-3.5 py-2.5 text-left transition-colors",
+        "group flex w-full items-center gap-3 border-l-2 px-3.5 py-2.5 text-left transition-colors",
         selected
           ? "border-accent bg-accent/8"
           : hovered
@@ -59,9 +60,7 @@ function TripRow({ trip, mode, domain, selected, hovered, onSelect, onHover }: P
               car {fmtMin(trip.car_min)} · transit {fmtMin(trip.transit_min)}
             </span>
           ) : mode === "transit" ? (
-            <span className="truncate font-sans text-[11px] text-graphite">
-              {trip.legs_summary || "—"}
-            </span>
+            <TransitLegs legs={trip.legs} summary={trip.legs_summary} />
           ) : (
             <span className="truncate font-sans text-[11px] text-graphite">
               arrive {trip.arrival_iso?.slice(11, 16) ?? "—"}

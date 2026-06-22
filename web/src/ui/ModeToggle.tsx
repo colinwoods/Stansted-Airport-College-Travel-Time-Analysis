@@ -1,10 +1,10 @@
 import { useApp } from "../state/AppState";
 import type { Mode } from "../data/types";
 
-const MODES: { id: Mode; label: string; hint: string }[] = [
-  { id: "car", label: "Car", hint: "Drive time" },
-  { id: "transit", label: "Transit", hint: "Public transport" },
-  { id: "diff", label: "Difference", hint: "Car vs transit" },
+const MODES: { id: Mode; label: string }[] = [
+  { id: "car", label: "Car" },
+  { id: "transit", label: "Transit" },
+  { id: "diff", label: "Difference" },
 ];
 
 export default function ModeToggle() {
@@ -22,21 +22,13 @@ export default function ModeToggle() {
             }}
             aria-pressed={active}
             className={[
-              "group flex flex-col items-start rounded-md px-3 py-2 text-left transition-colors",
+              "flex items-center justify-center rounded-md px-3 py-2.5 transition-colors",
               active
                 ? "bg-accent text-paper shadow-[0_2px_12px_-4px_rgba(0,175,222,0.5)]"
-                : "text-graphite hover:bg-surface-2",
+                : "text-graphite hover:bg-surface-2 hover:text-ink",
             ].join(" ")}
           >
             <span className="font-sans text-[13px] font-semibold leading-tight">{m.label}</span>
-            <span
-              className={[
-                "mt-0.5 font-mono text-[9px] uppercase tracking-section",
-                active ? "text-paper/90" : "text-faint",
-              ].join(" ")}
-            >
-              {m.hint}
-            </span>
           </button>
         );
       })}

@@ -10,6 +10,7 @@ import Map, {
 import type { Map as MaplibreMap } from "maplibre-gl";
 import { useApp } from "../state/AppState";
 import { fmtGap } from "../lib/format";
+import MapControls from "../ui/MapControls";
 import type { Mode } from "../data/types";
 import {
   CASING_LAYER_ID,
@@ -183,9 +184,18 @@ export default function MapView({
     setHoveredTripId(null);
   }, [setHoveredTripId]);
 
+  // bottom-left chrome: step zoom + reset back to the full catchment extent
+  const zoomIn = useCallback(() => mapRef.current?.getMap()?.zoomIn({ duration: 250 }), []);
+  const zoomOut = useCallback(() => mapRef.current?.getMap()?.zoomOut({ duration: 250 }), []);
+  const resetView = useCallback(() => {
+    const map = mapRef.current?.getMap();
+    if (map && bounds) map.fitBounds(bounds, { padding: 64, duration: 600 });
+  }, [bounds]);
+
   if (!routes || !meta || !originsFC) return null;
 
   return (
+    <>
     <Map
       ref={mapRef}
       mapStyle={printMode ? BASEMAP_LIGHT : BASEMAP_DARK}
@@ -264,5 +274,8 @@ export default function MapView({
         </div>
       </Marker>
     </Map>
+
+    {main && <MapControls onZoomIn={zoomIn} onZoomOut={zoomOut} onReset={resetView} />}
+    </>
   );
 }
