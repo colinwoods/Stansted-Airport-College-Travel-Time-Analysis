@@ -26,6 +26,10 @@
 
 :root {
   color-scheme: dark;
+  /* A4 landscape printable area = page (297×210mm) minus the @page 8mm margins.
+     Used to pin the map to the exact page box for export (see print rules). */
+  --print-w: calc(297mm - 16mm);
+  --print-h: calc(210mm - 16mm);
 }
 
 html,
@@ -205,10 +209,16 @@ body {
   .no-print {
     display: none !important;
   }
+  /* Pin the map to the exact A4 printable box. The maplibre canvas is sized in
+     explicit pixels from map.resize() (measured on-screen during print-prep at the
+     same box, below), so matching the page box here makes it fill edge-to-edge
+     with the right aspect — no white gap, no crop. */
   .print-full {
     position: absolute !important;
-    inset: 0 !important;
-    width: 100% !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: var(--print-w) !important;
+    height: var(--print-h) !important;
   }
   body {
     background: #fff;
@@ -223,4 +233,12 @@ body {
 /* On-screen "print preview" driven by the Print button toggle */
 .printing .no-print {
   display: none !important;
+}
+/* Print-prep: size the map to the A4 box on-screen too, so map.resize() measures
+   the print dimensions and repaints the GL buffer before window.print() fires.
+   Briefly visible behind the print dialog; the root's overflow-hidden clips it. */
+.printing .print-full {
+  flex: none;
+  width: var(--print-w);
+  height: var(--print-h);
 }

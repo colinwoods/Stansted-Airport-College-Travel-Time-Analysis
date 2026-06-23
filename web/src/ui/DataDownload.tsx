@@ -1,7 +1,8 @@
 import { useApp } from "../state/AppState";
 import type { TripProps } from "../data/types";
 
-// Car/transit journeys exported as two CSVs, each with mode-appropriate columns.
+// Car/transit journeys exported per mode as either a flat CSV (mode-appropriate
+// columns) or the raw route GeoJSON (LineString geometry + full properties).
 // Built client-side from the already-loaded routes, so no extra fetch is needed.
 
 const londonTime = (iso?: string): string =>
@@ -21,8 +22,8 @@ const field = (v: string | number | null | undefined): string => {
 const toCsv = (headers: string[], rows: (string | number | null)[][]): string =>
   "﻿" + [headers, ...rows].map((r) => r.map(field).join(",")).join("\r\n") + "\r\n";
 
-function download(filename: string, csv: string): void {
-  const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+function download(filename: string, content: string, mime: string): void {
+  const url = URL.createObjectURL(new Blob([content], { type: mime }));
   const a = document.createElement("a");
   a.href = url;
   a.download = filename;
@@ -45,47 +46,83 @@ export default function DataDownload() {
   if (!data) return null;
   const { target_date } = data.meta;
 
-  const tripsByMode = (mode: TripProps["mode"]): TripProps[] =>
+  const featuresByMode = (mode: TripProps["mode"]) =>
     data.routes.features
-      .map((f) => f.properties)
-      .filter((p) => p.mode === mode)
-      .sort((a, b) => a.originPostcode.localeCompare(b.originPostcode));
+      .filter((f) => f.properties.mode === mode)
+      .sort((a, b) =>
+        a.properties.originPostcode.localeCompare(b.properties.originPostcode),
+      );
 
-  const exportCar = () => {
-    const rows = tripsByMode("car").map((p) => [
-      p.originPostcode, p.duration_min, p.distance_km,
-      londonTime(p.departure_iso), londonTime(p.arrival_iso),
-    ]);
-    download(
-      `stansted-car-trips-${target_date}.csv`,
-      toCsv(["postcode", "duration_min", "distance_km", "departure", "arrival"], rows),
-    );
+  const exportCsv = (mode: TripProps["mode"]) => {
+    const rows = featuresByMode(mode).map((f) => f.properties);
+    if (mode === "car") {
+      download(
+        `stansted-car-trips-${target_date}.csv`,
+        toCsv(
+          ["postcode", "duration_min", "distance_km", "departure", "arrival"],
+          rows.map((p) => [
+            p.originPostcode, p.duration_min, p.distance_km,
+            londonTime(p.departure_iso), londonTime(p.arrival_iso),
+          ]),
+        ),
+        "text/csv;charset=utf-8",
+      );
+    } else {
+      download(
+        `stansted-transit-trips-${target_date}.csv`,
+        toCsv(
+          ["postcode", "duration_min", "distance_km", "legs", "realistic"],
+          rows.map((p) => [
+            p.originPostcode, p.duration_min, p.distance_km,
+            p.legs_summary ?? "", p.transit_realistic ? "true" : "false",
+          ]),
+        ),
+        "text/csv;charset=utf-8",
+      );
+    }
   };
 
-  const exportTransit = () => {
-    const rows = tripsByMode("transit").map((p) => [
-      p.originPostcode, p.duration_min, p.distance_km,
-      p.legs_summary ?? "", p.transit_realistic ? "true" : "false",
-    ]);
+  // Raw route features for the mode, geometry intact — the most useful form for
+  // anyone pulling the lines into QGIS / a map. Pretty-printed for readability.
+  const exportGeoJson = (mode: TripProps["mode"]) => {
+    const fc = { type: "FeatureCollection", features: featuresByMode(mode) };
     download(
-      `stansted-transit-trips-${target_date}.csv`,
-      toCsv(["postcode", "duration_min", "distance_km", "legs", "realistic"], rows),
+      `stansted-${mode}-routes-${target_date}.geojson`,
+      JSON.stringify(fc, null, 2),
+      "application/geo+json",
     );
   };
 
   const btn =
-    "flex items-center justify-center gap-1.5 rounded-full border border-hairline bg-transparent px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-section text-graphite transition-colors hover:border-accent hover:text-ink";
+    "group flex items-center justify-center gap-1.5 rounded-full border border-hairline bg-transparent px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-section text-graphite transition-colors hover:border-accent hover:text-ink";
+  const fmt = "text-faint transition-colors group-hover:text-graphite";
+
+  // Mode-grouped, each row one mode: Car (CSV | GeoJSON), then Transit (CSV | GeoJSON).
+  const modes: { mode: TripProps["mode"]; label: string }[] = [
+    { mode: "car", label: "Car" },
+    { mode: "transit", label: "Transit" },
+  ];
+  const formats: { format: string; run: (m: TripProps["mode"]) => void }[] = [
+    { format: "CSV", run: exportCsv },
+    { format: "GeoJSON", run: exportGeoJson },
+  ];
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="kicker">Download data (CSV)</div>
+      <div className="kicker">Download data</div>
       <div className="grid grid-cols-2 gap-2">
-        <button type="button" onClick={exportCar} className={btn}>
-          <DownloadIcon /> Car
-        </button>
-        <button type="button" onClick={exportTransit} className={btn}>
-          <DownloadIcon /> Transit
-        </button>
+        {modes.flatMap(({ mode, label }) =>
+          formats.map(({ format, run }) => (
+            <button
+              key={`${mode}-${format}`}
+              type="button"
+              onClick={() => run(mode)}
+              className={btn}
+            >
+              <DownloadIcon /> {label} <span className={fmt}>· {format}</span>
+            </button>
+          )),
+        )}
       </div>
     </div>
   );
