@@ -572,5 +572,159 @@
     "lng": 0.06009830000000001,
     "place_id": "ChIJg59rtAih2EcRqONIt9Qj0gw",
     "formatted_address": "Southern Dr, Loughton IG10 3BX, UK"
+  },
+  "CM17 9QH": {
+    "status": "OK",
+    "lat": 51.761423,
+    "lng": 0.1374213,
+    "place_id": "ChIJ_yzcQHmZ2EcRARoWBhMsMtc",
+    "formatted_address": "Burley Hill, Harlow CM17 9QH, UK"
+  },
+  "CM17 9PZ": {
+    "status": "OK",
+    "lat": 51.7670799,
+    "lng": 0.1462686,
+    "place_id": "ChIJUSKpkICZ2EcRz7b6mlEM-Sw",
+    "formatted_address": "Denby Grange, Harlow CM17 9PZ, UK"
+  },
+  "CM9 4PT": {
+    "status": "OK",
+    "lat": 51.7410481,
+    "lng": 0.6787015,
+    "place_id": "ChIJVY7ZYTfh2EcRMoUdbR_6rvo",
+    "formatted_address": "Abbotsmead, Heybridge, Maldon CM9 4PT, UK"
+  },
+  "CM18 7JT": {
+    "status": "OK",
+    "lat": 51.7515225,
+    "lng": 0.1010082,
+    "place_id": "ChIJVacyUUmZ2EcR8JGb2tvW83E",
+    "formatted_address": "Woodhill, Harlow CM18 7JT, UK"
+  },
+  "CM15 9NE": {
+    "status": "OK",
+    "lat": 51.63581509999999,
+    "lng": 0.286749,
+    "place_id": "ChIJ7Zj3f4G-2EcRi3ou5WiLrzo",
+    "formatted_address": "Larchwood Gardens, Pilgrims Hatch, Brentwood CM15 9NE, UK"
+  },
+  "CB7 5EP": {
+    "status": "OK",
+    "lat": 52.3487518,
+    "lng": 0.3117578,
+    "place_id": "ChIJBQQCrkdr2EcRxIVdHxROLmk",
+    "formatted_address": "The Cotes, Soham, ELY CB7 5EP, UK"
+  },
+  "EN7 5BT": {
+    "status": "OK",
+    "lat": 51.6996273,
+    "lng": -0.04973,
+    "place_id": "ChIJk3-Le8shdkgR3CopMgfUMUE",
+    "formatted_address": "Gyfford Walk, Cheshunt, Waltham Cross EN7 5BT, UK"
+  },
+  "CB7 5ES": {
+    "status": "OK",
+    "lat": 52.34228659999999,
+    "lng": 0.3337068,
+    "place_id": "ChIJo2BkfyFr2EcRsTGNOD7sw2U",
+    "formatted_address": "Martin Cl, Soham, ELY CB7 5ES, UK"
+  },
+  "CO4 9RX": {
+    "status": "OK",
+    "lat": 51.9069289,
+    "lng": 0.9179927999999999,
+    "place_id": "ChIJWyZ4B7QF2UcRCbg-aUriNok",
+    "formatted_address": "Harebell Cl, Highwoods, Colchester CO4 9RX, UK"
+  },
+  "CM2 0PG": {
+    "status": "OK",
+    "lat": 51.7319124,
+    "lng": 0.466765,
+    "place_id": "ChIJN7ehJNHr2EcRXABBMlIyJn4",
+    "formatted_address": "Chelmsford CM2 0PG, UK"
+  },
+  "SG18 0EG": {
+    "status": "OK",
+    "lat": 52.0952365,
+    "lng": -0.2649957,
+    "place_id": "ChIJv5Z-9xfMd0gRx0-dVM7jD0s",
+    "formatted_address": "Beech Ave, Biggleswade SG18 0EG, UK"
+  },
+  "WD24 7EA": {
+    "status": "OK",
+    "lat": 51.673968,
+    "lng": -0.3880348,
+    "place_id": "ChIJFQRks69qdkgRDHt9kyRPGyA",
+    "formatted_address": "Westfield Ave, Watford WD24 7EA, UK"
+  },
+  "SS4 1GX": {
+    "status": "OK",
+    "lat": 51.5828974,
+    "lng": 0.6897268,
+    "place_id": "ChIJaf3-HznZ2EcRhz4tL4Qts6Y",
+    "formatted_address": "Rochford SS4 1GX, UK"
+  },
+  "IP14 2NP": {
+    "status": "OK",
+    "lat": 52.1634454,
+    "lng": 0.9671607999999999,
+    "place_id": "ChIJke_eVIqv2UcRDcHZCcr09OE",
+    "formatted_address": "Combs Grn, Combs, Stowmarket IP14 2NP, UK"
+  },
+  "CM19 5NF": {
+    "status": "OK",
+    "lat": 51.7557598,
+    "lng": 0.0725444,
+    "place_id": "ChIJzYLQFL2e2EcR7h8xWw6Jj-g",
+    "formatted_address": "Tithelands, Harlow CM19 5NF, UK"
+  },
+  "CM3 1SH": {
+    "status": "OK",
+    "lat": 51.8327489,
+    "lng": 0.5093451999999999,
+    "place_id": "ChIJkxRp8Dju2EcREp_jrUPCni4",
+    "formatted_address": "Shimbrooks, Great Leighs, Chelmsford CM3 1SH, UK"
+  },
+  "CM17 0DX": {
+    "status": "OK",
+    "lat": 51.7845658,
+    "lng": 0.141589,
+    "place_id": "ChIJfVbKTsub2EcRwQl2r04OlKg",
+    "formatted_address": "Watlington Rd, Harlow CM17 0DX, UK"
+  },
+  "SS4 1JD": {
+    "status": "OK",
+    "lat": 51.56931489999999,
+    "lng": 0.7066323999999999,
+    "place_id": "ChIJvRl9SBzZ2EcRU0_Hthi63AY",
+    "formatted_address": "Southend Rd, Rochford SS4 1JD, UK"
+  },
+  "IG8 9NE": {
+    "status": "OK",
+    "lat": 51.6010693,
+    "lng": 0.0016095,
+    "place_id": "ChIJn7II7aqg2EcRH2_bDGcR1lQ",
+    "formatted_address": "Sky Peals Rd, Woodford Green IG8 9NE, UK"
+  },
+  "CM18 6XP": {
+    "status": "OK",
+    "lat": 51.7586662,
+    "lng": 0.0902111,
+    "place_id": "ChIJ4UFrwK2e2EcR0Q6XycujYxI",
+    "formatted_address": "Kingsland, Harlow CM18 6XP, UK"
+  },
+  "E10 5QZ": {
+    "status": "OK",
+    "lat": 51.56045049999999,
+    "lng": -0.0084703,
+    "place_id": "ChIJI-aeqIMddkgRrKlA9naBk4I",
+    "formatted_address": "Sidmouth Rd, London E10 5QZ, UK"
+  },
+  "CO6 3JB": {
+    "status": "OK",
+    "lat": 51.9130225,
+    "lng": 0.8536455,
+    "place_id": "ChIJQ-5gyPID2UcRCCfo3Jy0pxM",
+    "formatted_address": "Chapel Rd, West Bergholt, Colchester CO6 3JB, UK"
   }
 }

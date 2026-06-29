@@ -38,7 +38,7 @@ DESTINATION = {
 LONDON = ZoneInfo("Europe/London")
 # Must be a FUTURE weekday: traffic-aware car routing back-solves a departureTime, and
 # the Routes API rejects a past departureTime (HTTP 400). run.py guards against this.
-TARGET_DATE = "2026-06-23"          # Tuesday, term time
+TARGET_DATE = "2026-06-30"          # Tuesday
 ARRIVAL_LOCAL_TIME = (9, 0)         # 09:00 local
 
 
